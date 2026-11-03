@@ -13,11 +13,8 @@ ligação) são traduzidos em `TratamentoErros`.
 - VS Code com as extensões **C# Dev Kit** (inclui C#) e **SQL Server (mssql)**
 
 ## 1. Base de dados
-Opção A — SQL Server em Docker:
 ```
-docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=GameVault#2026" -p 1433:1433 --name sql-gamevault -d mcr.microsoft.com/mssql/server:2022-latest
-```
-Opção B — LocalDB (Windows): cadeia `Server=(localdb)\\MSSQLLocalDB;Database=GameVault;Trusted_Connection=True;TrustServerCertificate=True`
+LocalDB (Windows): cadeia `Server=(localdb)\\MSSQLLocalDB;Database=GameVault;Trusted_Connection=True;TrustServerCertificate=True`
 
 Executar o script:
 - No VS Code: separador SQL Server → *Add Connection* → abrir `BaseDados/01_criar_base_dados.sql`
@@ -37,31 +34,13 @@ dotnet build
 dotnet run
 ```
 
-## 3. Guia de teste (manual)
-Utilizadores de exemplo: `ana.silva`, `bruno.costa`, `carla.matos`.
+## 3. Principais Funcionalidades
 
-| # | Ação | Resultado esperado |
-|---|------|--------------------|
-| 1 | Menu 4 sem sessão | "Inicie sessão primeiro" |
-| 2 | Opção 1 → escolher `ana.silva`; Menu 4 → *Ver biblioteca* | 4 jogos e total de 228,0 horas |
-| 3 | *Registar horas* em Hades com `2,5` | Total passa de 35,0 para 37,5 h |
-| 4 | *Registar horas* com `-3` ou `0` | Recusado: horas têm de ser > 0 |
-| 5 | Menu 5 → avaliar Elden Ring com `11` | Recusado: nota entre 0 e 10 |
-| 6 | Avaliar Elden Ring com `9,0` e depois com `9,5` | "Avaliação registada" e depois "atualizada" |
-| 7 | Menu 6 → desbloquear conquista repetida (mesmo jogo e título) | Erro "valor duplicado" |
-| 8 | Adicionar à biblioteca um jogo que já lá está | "Já está na sua biblioteca" |
-| 9 | Menu 3 → Categorias → eliminar "RPG" | Recusado (está em uso por jogos) |
-| 10 | Criar utilizador com email `abc` | Recusado: formato inválido |
-| 11 | Remover Celeste da biblioteca da Ana | Avaliação e conquista do Celeste também desaparecem |
-| 12 | Parar o SQL Server e arrancar a aplicação | Mensagem clara de falha de ligação |
+1. Banner e menus: aparece o banner “GameVault” em ASCII. Os menus escolhem-se com ↑/↓ e Enter.
+2. Escolha de jogos, plataformas e utilizadores: passa a ser numa lista navegável, com “← Cancelar” no fim.
+3. Listagens: saem em tabelas com bordas arredondadas.
+4. Biblioteca: os estados têm cores (verde para Concluído, azul para A jogar, vermelho para Abandonado). Há um painel de resumo e um gráfico de barras com as horas por jogo.
+5. Avaliações e conquistas: as notas aparecem com estrelas (★★★★★ 9,5) e as conquistas com pontos e total.
+6. Mensagens: sucesso com ✔ a verde, avisos a amarelo e erros a vermelho. Os campos opcionais mantêm o valor atual se carregar só em Enter.
 
-Verificação direta na base de dados:
-```sql
-SELECT u.NomeUtilizador, j.Titulo, b.HorasJogadas, b.Estado
-FROM dbo.Bibliotecas b
-JOIN dbo.Utilizadores u ON u.IdUtilizador = b.IdUtilizador
-JOIN dbo.Jogos j ON j.IdJogo = b.IdJogo;
-
--- Deve falhar (CHECK): UPDATE dbo.Bibliotecas SET HorasJogadas = -1 WHERE IdBiblioteca = 1;
--- Deve falhar (CHECK): UPDATE dbo.Avaliacoes   SET Nota = 11 WHERE IdAvaliacao = 1;
 ```
